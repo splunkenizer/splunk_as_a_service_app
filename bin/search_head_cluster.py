@@ -58,7 +58,7 @@ def get(splunk, kubernetes, stack_id, stack_config):
     custom_objects_api = kuberneteslib.CustomObjectsApi(kubernetes)
     search_head_clusters = custom_objects_api.list_namespaced_custom_object(
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="searchheadclusters",
         namespace=stack_config["namespace"],
         label_selector="app=saas,stack_id=%s" % stack_id,
@@ -88,7 +88,7 @@ def update(splunk, kubernetes, stack_id, stack_config):
     if len(operations) > 0:
         custom_objects_api.patch_namespaced_custom_object(
             group="enterprise.splunk.com",
-            version="v1alpha2",
+            version="v1",
             namespace=stack_config["namespace"],
             name=search_head_cluster["metadata"]["name"],
             plural="searchheadclusters",
@@ -173,11 +173,11 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
     custom_objects_api = kuberneteslib.CustomObjectsApi(kubernetes)
     custom_objects_api.create_namespaced_custom_object(
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         namespace=stack_config["namespace"],
         plural="searchheadclusters",
         body={
-            "apiVersion": "enterprise.splunk.com/v1alpha2",
+            "apiVersion": "enterprise.splunk.com/v1",
             "kind": "SearchHeadCluster",
             "metadata": {
                 "name": stack_id,

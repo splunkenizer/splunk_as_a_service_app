@@ -176,7 +176,7 @@ def validate_cluster(splunk, record):
         extensions_api = client.ApiextensionsV1beta1Api(api_client)
         crd = extensions_api.read_custom_resource_definition(
             "standalones.enterprise.splunk.com")
-        if crd.spec.version != "v1alpha2":
+        if crd.spec.version != "v1":
             raise errors.ApplicationError(
                 "Unexpected Splunk Operator version: %s" % crd.spec.version)
     except client.rest.ApiException as e:

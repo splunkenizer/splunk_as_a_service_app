@@ -52,7 +52,7 @@ def get(splunk, kubernetes, stack_id, stack_config):
     custom_objects_api = kuberneteslib.CustomObjectsApi(kubernetes)
     license_masters = custom_objects_api.list_namespaced_custom_object(
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="licensemasters",
         namespace=stack_config["namespace"],
         label_selector="app=saas,stack_id=%s" % stack_id,
@@ -145,11 +145,11 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
         spec["storageClassName"] = cluster_config.storage_class
     custom_objects_api.create_namespaced_custom_object(
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         namespace=stack_config["namespace"],
         plural="licensemasters",
         body={
-            "apiVersion": "enterprise.splunk.com/v1alpha2",
+            "apiVersion": "enterprise.splunk.com/v1",
             "kind": "LicenseMaster",
             "metadata": {
                 "name": stack_id,

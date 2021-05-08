@@ -147,7 +147,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
     search_heads = custom_objects_api.list_namespaced_custom_object(
         namespace=stack_config["namespace"],
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="searchheadclusters",
         label_selector="app=saas,stack_id=%s" % stack_id,
     )["items"]
@@ -155,7 +155,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
         custom_objects_api.delete_namespaced_custom_object(
             namespace=stack_config["namespace"],
             group="enterprise.splunk.com",
-            version="v1alpha2",
+            version="v1",
             plural="searchheadclusters",
             name=search_head["metadata"]["name"],
             body=kuberneteslib.V1DeleteOptions(),
@@ -163,7 +163,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
     standalones = custom_objects_api.list_namespaced_custom_object(
         namespace=stack_config["namespace"],
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="standalones",
         label_selector="app=saas,stack_id=%s" % stack_id,
     )["items"]
@@ -171,7 +171,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
         custom_objects_api.delete_namespaced_custom_object(
             namespace=stack_config["namespace"],
             group="enterprise.splunk.com",
-            version="v1alpha2",
+            version="v1",
             plural="standalones",
             name=standalone["metadata"]["name"],
             body=kuberneteslib.V1DeleteOptions(),
@@ -179,7 +179,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
     indexers = custom_objects_api.list_namespaced_custom_object(
         namespace=stack_config["namespace"],
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="indexerclusters",
         label_selector="app=saas,stack_id=%s" % stack_id,
     )["items"]
@@ -187,7 +187,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
         custom_objects_api.delete_namespaced_custom_object(
             namespace=stack_config["namespace"],
             group="enterprise.splunk.com",
-            version="v1alpha2",
+            version="v1",
             plural="indexerclusters",
             name=indexer["metadata"]["name"],
             body=kuberneteslib.V1DeleteOptions(),
@@ -195,7 +195,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
     license_masters = custom_objects_api.list_namespaced_custom_object(
         namespace=stack_config["namespace"],
         group="enterprise.splunk.com",
-        version="v1alpha2",
+        version="v1",
         plural="licensemasters",
         label_selector="app=saas,stack_id=%s" % stack_id,
     )["items"]
@@ -203,7 +203,7 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
         custom_objects_api.delete_namespaced_custom_object(
             namespace=stack_config["namespace"],
             group="enterprise.splunk.com",
-            version="v1alpha2",
+            version="v1",
             plural="licensemasters",
             name=license_master["metadata"]["name"],
             body=kuberneteslib.V1DeleteOptions(),
