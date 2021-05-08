@@ -27,7 +27,7 @@ def get_admin_password(core_api, stack_id, stack_config, role):
         secret_role = services.indexer_role
     else:
         secret_role = role
-    secret_name = "splunk-%s-%s-secrets" % (stack_id, secret_role)
+    secret_name = "splunk-%s-%s-secret-v1" % (stack_id, secret_role)
     core_api.list_secret_for_all_namespaces()
     secrets = core_api.read_namespaced_secret(
         secret_name,
