@@ -140,7 +140,7 @@
                             Make sure the Splunk as a Service app has access to the internal logs from the license master for chargeback analytics.
                         </p>
                     </splunk-control-group>
-                    <splunk-control-group class="license_master_mode local" label="Splunk Enterprise" help="">	
+                    <splunk-control-group class="license_master_mode local" label="Splunk Enterprise License" help="Paste the content of the license file">	
                         <splunk-text-area class="license option" name="enterprise_license" style="height: 200px;">	
                         </splunk-text-area>
                     </splunk-control-group>
