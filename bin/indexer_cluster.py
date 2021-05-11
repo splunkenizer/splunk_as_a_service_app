@@ -96,17 +96,6 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
             }
         }
     }
-    if stack_config["license_master_mode"] == "remote":
-        splunk_defaults["splunk"]["conf"]["server"] = {
-            "content": {
-                "license": {
-                    "master_uri": cluster_config.license_master_url,
-                },
-                "general": {
-                    "pass4SymmKey": cluster_config.license_master_pass4symmkey,
-                },
-            }
-        }
     spec = {
         "replicas": int(stack_config["indexer_count"]),
         "clusterMasterRef": {
@@ -126,8 +115,15 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
         },
         "etcStorage": '%sGi' % stack_config["etc_storage_in_gb"],
         "varStorage": '%sGi' % stack_config["indexer_var_storage_in_gb"],
-        "defaults": yaml.dump(splunk_defaults),
     }
+    if stack_config["license_master_mode"] == "remote":
+        splunk_defaults.update({
+            "splunk": {
+                "license_master_url": cluster_config.license_master_url
+                }
+            })
+    if len(splunk_defaults) > 0:
+        spec["defaults"] = yaml.dump(splunk_defaults)
     if cluster_config.node_selector:
         labels = cluster_config.node_selector.split(",")
         match_expressions = []

@@ -75,17 +75,6 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
             }
         }
     }
-    if stack_config["license_master_mode"] == "remote":
-        splunk_defaults["splunk"]["conf"]["server"] = {
-            "content": {
-                "license": {
-                    "master_uri": cluster_config.license_master_url,
-                },
-                "general": {
-                    "pass4SymmKey": cluster_config.license_master_pass4symmkey,
-                },
-            }
-        }
     spec = {
         "image": cluster_config.default_splunk_image,
         "imagePullPolicy": "Always",
@@ -101,8 +90,16 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
         },
         "etcStorage": '%sGi' % stack_config["etc_storage_in_gb"],
         "varStorage": '%sGi' % stack_config["indexer_var_storage_in_gb"],
-        "defaults": yaml.dump(splunk_defaults),
     }
+    if stack_config["license_master_mode"] == "remote":
+        splunk_defaults.update({
+            "splunk": {
+                "license_master_url": cluster_config.license_master_url
+                }
+            })
+
+    if len(splunk_defaults) > 0:
+        spec["defaults"] = yaml.dump(splunk_defaults)
     if stack_config["license_master_mode"] == "local":
         license_config_map = licensemasters.get_license_config_map(core_api, stack_id, stack_config)
         spec.update({

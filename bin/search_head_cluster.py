@@ -101,23 +101,7 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
     if search_head_cluster:
         return
     splunk_defaults = {
-        "splunk": {
-            "conf": {
-
-            }
-        }
     }
-    if stack_config["license_master_mode"] == "remote":
-        splunk_defaults["splunk"]["conf"]["server"] = {
-            "content": {
-                "license": {
-                    "master_uri": cluster_config.license_master_url,
-                },
-                "general": {
-                    "pass4SymmKey": cluster_config.license_master_pass4symmkey,
-                },
-            }
-        }
     spec = {
         "replicas": int(stack_config["search_head_count"]),
         "image": cluster_config.default_splunk_image,
@@ -139,6 +123,14 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
             "name": "%s" % stack_id,
         }
     }
+    if stack_config["license_master_mode"] == "remote":
+        splunk_defaults.update({
+            "splunk": {
+                "license_master_url": cluster_config.license_master_url
+                }
+            })
+    if len(splunk_defaults) > 0:
+        spec["defaults"] = yaml.dump(splunk_defaults)
     if cluster_config.node_selector:
         labels = cluster_config.node_selector.split(",")
         match_expressions = []
