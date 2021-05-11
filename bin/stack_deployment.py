@@ -15,6 +15,7 @@ import instances
 import ssl
 import stacks
 import clusters
+import cluster_master
 import indexer_cluster
 import search_head_cluster
 import standalones
@@ -35,8 +36,10 @@ def create_deployment(splunk, kubernetes, stack_id, stack_config, cluster_config
             deployed_license_master = True
         else:
             deployed_license_master = False
+        cluster_master.deploy(splunk, kubernetes, stack_id, stack_config, cluster_config)
         indexer_cluster.deploy(splunk, kubernetes, stack_id, stack_config, cluster_config)
         search_head_cluster.deploy(splunk, kubernetes, stack_id, stack_config, cluster_config)
+        cluster_master.wait_until_ready(splunk, kubernetes, stack_id, stack_config)
         indexer_cluster.wait_until_ready(splunk, kubernetes, stack_id, stack_config)
         search_head_cluster.wait_until_ready(splunk, kubernetes, stack_id, stack_config)
         if deployed_license_master:
@@ -190,6 +193,22 @@ def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
             version="v1",
             plural="indexerclusters",
             name=indexer["metadata"]["name"],
+            body=kuberneteslib.V1DeleteOptions(),
+        )
+    cluster_masters = custom_objects_api.list_namespaced_custom_object(
+        namespace=stack_config["namespace"],
+        group="enterprise.splunk.com",
+        version="v1",
+        plural="clustermasters",
+        label_selector="app=saas,stack_id=%s" % stack_id,
+    )["items"]
+    for cluster_master in cluster_masters:
+        custom_objects_api.delete_namespaced_custom_object(
+            namespace=stack_config["namespace"],
+            group="enterprise.splunk.com",
+            version="v1",
+            plural="clustermasters",
+            name=cluster_master["metadata"]["name"],
             body=kuberneteslib.V1DeleteOptions(),
         )
     license_masters = custom_objects_api.list_namespaced_custom_object(

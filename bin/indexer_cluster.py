@@ -109,6 +109,9 @@ def deploy(splunk, kubernetes, stack_id, stack_config, cluster_config):
         }
     spec = {
         "replicas": int(stack_config["indexer_count"]),
+        "clusterMasterRef": {
+            "name": stack_id
+            },
         "image": cluster_config.default_splunk_image,
         "imagePullPolicy": "Always",
         "resources": {
