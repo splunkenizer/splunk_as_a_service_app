@@ -67,9 +67,11 @@ class InstancesHandler(BaseRestHandler):
 
         instances = {}
 
+        #FIXME: label_selector does exclude monitoring-console for now
+        # Can be removed as soon as the stack_id label has been removed
         pods = core_api.list_namespaced_pod(
             namespace=stack_config["namespace"],
-            label_selector="app=saas,stack_id=%s" % stack_id,
+            label_selector="app=saas,stack_id=%s,app.kubernetes.io/name!=monitoring-console" % stack_id,
         ).items
         for pod in pods:
             name = pod.metadata.name
