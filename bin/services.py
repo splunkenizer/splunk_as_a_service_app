@@ -16,7 +16,7 @@ search_head_role = "search-head"
 indexer_role = "indexer"
 cluster_master_role = "cluster-master"
 license_master_role = "license-master"
-
+monitoring_console_role = "monitoring-console"
 
 def get(core_api, service_name, namespace):
     try:
@@ -49,22 +49,25 @@ def create_load_balancers(core_api, stack_id, role, namespace):
         "stack_id": stack_id,
     }
     if role == standalone_role:
-        selector["app.kubernetes.io/name"] = "standalone"
+        selector["app.kubernetes.io/name"] = standalone_role
         web = mgmt = splunktcp = tcp = True
     elif role == indexer_role:
-        selector["app.kubernetes.io/name"] = "indexer"
+        selector["app.kubernetes.io/name"] = indexer_role
         splunktcp = tcp = True
     elif role == cluster_master_role:
-        selector["app.kubernetes.io/name"] = "cluster-master"
+        selector["app.kubernetes.io/name"] = cluster_master_role
         web = mgmt = True
     elif role == deployer_role:
-        selector["app.kubernetes.io/name"] = "deployer"
+        selector["app.kubernetes.io/name"] = deployer_role
         web = mgmt = True
     elif role == license_master_role:
-        selector["app.kubernetes.io/name"] = "license-master"
+        selector["app.kubernetes.io/name"] = license_master_role
         web = mgmt = True
     elif role == search_head_role:
-        selector["app.kubernetes.io/name"] = "search-head"
+        selector["app.kubernetes.io/name"] = search_head_role
+        web = mgmt = True
+    elif role == monitoring_console_role:
+        selector["app.kubernetes.io/name"] = monitoring_console_role
         web = mgmt = True
     else:
         raise Exception("unexpected role")
@@ -146,7 +149,10 @@ def create_load_balancers(core_api, stack_id, role, namespace):
         for load_balancer_name in lbs_to_delete:
             delete(core_api, load_balancer_name, namespace)
     else:
-        load_balancer_name = "splunk-%s-%s-lb" % (stack_id, role)
+        if role == monitoring_console_role:
+            load_balancer_name = "splunk-%s-%s-lb" % (namespace, role)
+        else:
+            load_balancer_name = "splunk-%s-%s-lb" % (stack_id, role)
         if not get(core_api, load_balancer_name, namespace):
             logging.info("creating load balancer for '%s' ..." % (role))
             core_api.create_namespaced_service(
@@ -188,6 +194,12 @@ def get_load_balancer_hosts(core_api, stack_id, role, namespace):
         label_selector="app=saas,stack_id=%s,role=%s" % (
             stack_id, role),
     ).items
+    if role == monitoring_console_role:
+        monitoring_console_load_balancer = core_api.list_namespaced_service(
+            namespace=namespace,
+            label_selector="app=saas,role=%s" % role
+        ).items
+        load_balancers += monitoring_console_load_balancer
     for service in load_balancers:
         if not service.status:
             continue

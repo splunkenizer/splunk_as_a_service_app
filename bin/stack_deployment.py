@@ -51,6 +51,7 @@ def create_deployment(splunk, kubernetes, stack_id, stack_config, cluster_config
 
 
 def update_deployment(splunk, kubernetes, stack_id):
+    core_api = kuberneteslib.CoreV1Api(kubernetes)
     stack_config = stacks.get_stack_config(splunk, stack_id)
     cluster_name = stack_config["cluster"]
     kubernetes = clusters.create_client(splunk, cluster_name)
@@ -60,7 +61,8 @@ def update_deployment(splunk, kubernetes, stack_id):
         search_head_cluster.update(splunk, kubernetes, stack_id, stack_config)
         indexer_cluster.wait_until_ready(splunk, kubernetes, stack_id, stack_config)
         search_head_cluster.wait_until_ready(splunk, kubernetes, stack_id, stack_config)
-
+        create_load_balancers(core_api, stack_id, stack_config)
+        verify_load_balancers_completed(core_api, stack_id, stack_config)
 
 def create_load_balancers(core_api, stack_id, stack_config):
     if stack_config["deployment_type"] == "standalone":
@@ -104,7 +106,12 @@ def create_load_balancers(core_api, stack_id, stack_config):
                 services.indexer_role,
                 stack_config["namespace"],
             )
-
+    services.create_load_balancers(
+        core_api,
+        stack_id,
+        services.monitoring_console_role,
+        stack_config["namespace"],
+    )
 
 def verify_load_balancer_completed(core_api, stack_id, stack_config, role):
     # getaddrinfo(host, port, 0, SOCK_STREAM)
@@ -142,6 +149,7 @@ def verify_load_balancers_completed(core_api, stack_id, stack_config):
         if int(stack_config["indexer_count"]) > 0:
             verify_load_balancer_completed(core_api, stack_id, stack_config, services.cluster_master_role)
             verify_load_balancer_completed(core_api, stack_id, stack_config, services.indexer_role)
+    verify_load_balancer_completed(core_api, stack_id, stack_config, services.monitoring_console_role)
 
 
 def delete_objects(kubernetes, stack_id, stack_config, cluster_config):
